@@ -7,7 +7,7 @@ const User = db.define('user', {
     allowNull: false //允许null
   },
   user_id:{
-    type: Sequelize.STRING(16),
+    type: Sequelize.STRING(36),
     allowNull: false 
   },
   account:{

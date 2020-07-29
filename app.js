@@ -1,15 +1,18 @@
 const Koa =require("koa")
 const bodyParser = require('koa-bodyparser');
 const koajwt = require('koa-jwt')
+const serve = require('koa-static');
 const router = require("./routes/index")
-
-const config = require("./config.json")
+const path = require("path")
+const config = require("./config.json");
 
 const app = new Koa()
 
 
 app.use(bodyParser())
 
+/**静态资源*/
+app.use(serve(path.join(__dirname + "/dist")));
 
 app.use((ctx, next) => {
   return next().catch((err) => {

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <style>
+      #app{
+        width: 500px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <template v-if="type==1">
+        <el-form label-width="80px">
+          <el-form-item label="昵称">
+            <el-input v-model="name"></el-input>
+          </el-form-item>
+          <el-form-item label="账号">
+            <el-input v-model="account"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="password"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmit">注册</el-button>
+            <el-button type="default" @click="type=2">去登录</el-button>
+          </el-form-item>
+        </el-form>
+      </template>
+      <template v-if="type==2">
+        <el-form label-width="80px">
+          <el-form-item label="账号">
+            <el-input v-model="account"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="password"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="login">登录</el-button>
+            <el-button type="primary" @click="getInfo">获取信息</el-button>
+            <el-button type="default" @click="type=1">去注册</el-button>
+          </el-form-item>
+          {{info}}
+        </el-form>
+      </template>
+    </div>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return { 
+            type:2,
+            account:"",
+            password:"",
+            name:"",
+            info:{}
+           };
+        },
+        watch: {
+          type(){
+            this.account = ""
+            this.password = ""
+            this.name = ""
+          }
+        },
+        methods: {
+          getInfo(){
+            this.request("/user/info", "GET").then(res => {
+              this.info = res.data
+            })
+          },
+          request(url, method, data={}){
+            if(method=='GET'){
+              let str = ""
+              for(let k in data){
+                str = str?`&${k}=${data[k]}`:`${k}=${data[k]}`
+              }
+              return fetch(`${url}?${str}`, {method, headers:{
+                "Content-Type":"application/json;charset=utf-8",
+                "Authorization": `bearer ${localStorage.token}`
+              }}).then(res => res.json())
+            }else if(method=="POST"){
+              return fetch(url, {method, headers:{
+                "Content-Type":"application/json;charset=utf-8"
+              },body:JSON.stringify(data)}).then(res => res.json())
+            }
+          },
+          login(){
+            this.info = {}
+            const {account, password} = this
+            if(!account||!password) return alert("必填！")
+            this.request("/user/login", "POST", {account, password}).then(res => {
+              if(res.code){
+                localStorage.token = res.token
+                this.getInfo()
+              }else{
+                alert(res.msg)
+              }
+            })
+          },
+          onSubmit(){
+            const {account, password,name} = this
+            if(account&&password&&name){
+              this.request('/user/register', 'POST',{account, password,name}).then(res => {
+                alert(res.msg)
+              })
+            }else{
+              alert("必填!")
+            }
+          }
+        },
+      });
+    </script>
+  </body>
+</html>
