@@ -1,4 +1,4 @@
-const userDb = require("../db/user");
+const userDb = require("../models/user");
 const { v4 } = require("uuid");
 const md5 = require("md5");
 const jsonwebtoken = require("jsonwebtoken")
